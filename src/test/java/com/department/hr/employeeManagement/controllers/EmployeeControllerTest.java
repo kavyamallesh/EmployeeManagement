@@ -20,7 +20,7 @@ class EmployeeControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void getEmployeesShouldReturnDefaultMsg() throws Exception {
+    void getEmployeesShouldReturnDefaultSuccessMsg() throws Exception {
 
         MockMultipartFile file
                 = new MockMultipartFile(
@@ -36,5 +36,11 @@ class EmployeeControllerTest {
                 .andExpect(content().string("Successful"));
     }
 
+    @Test
+    void getEmployeesShouldReturnBadInputErrorIfInputFileIsNotPassed() throws Exception {
+        this.mockMvc
+                .perform(multipart("/upload"))
+                .andExpect(status().is(400));
+    }
 
 }
