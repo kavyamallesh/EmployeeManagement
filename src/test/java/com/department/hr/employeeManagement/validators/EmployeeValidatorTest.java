@@ -61,6 +61,28 @@ class EmployeeValidatorTest {
         assertThat(exception.getMessage()).isEqualTo("Invalid salary -12343.0, salary should be greater than 0");
     }
 
+    @Test
+    public void shouldNotThrowInvalidFieldExceptionWhenIdIsAlphaNumeric() throws InvalidFieldException {
+        validator.validateId("e1", "id");
+    }
+
+    @Test
+    public void shouldThrowInvalidFieldExceptionWhenIdIsNullOrNotAlphaNumeric() throws InvalidFieldException {
+        assertThrows(InvalidFieldException.class, ()->validator.validateId(null, "id"));
+        assertThrows(InvalidFieldException.class, ()->validator.validateId("344,8", "id"));
+    }
+
+    @Test
+    public void shouldNotThrowInvalidFieldExceptionWhenLoginIsAlphaNumeric() throws InvalidFieldException {
+        validator.validateId("sara1", "id");
+    }
+
+    @Test
+    public void shouldThrowInvalidFieldExceptionWhenLoginIsNullOrNotAlphaNumeric() throws InvalidFieldException {
+        assertThrows(InvalidFieldException.class, ()->validator.validateId(null, "id"));
+        assertThrows(InvalidFieldException.class, ()->validator.validateId("sara_tan", "id"));
+    }
+
 
 
 }

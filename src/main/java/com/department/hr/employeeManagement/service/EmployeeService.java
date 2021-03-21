@@ -4,7 +4,9 @@ import com.department.hr.employeeManagement.entity.Employee;
 import com.department.hr.employeeManagement.exceptions.DuplicateDataException;
 import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
+import com.department.hr.employeeManagement.repository.EmployeeRepository;
 import com.department.hr.employeeManagement.validators.EmployeeValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -23,23 +25,30 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class EmployeeService {
 
     @Autowired
     private final EmployeeValidator validator;
 
-    public EmployeeService(EmployeeValidator validator) {
+    @Autowired
+    private final EmployeeRepository repository;
+
+    public EmployeeService(EmployeeValidator validator, EmployeeRepository repository) {
         this.validator = validator;
+        this.repository = repository;
     }
 
-    public void uploadData(MultipartFile file) throws FileFormatException, IOException, DuplicateDataException {
+    public List uploadData(MultipartFile file) throws FileFormatException, IOException, DuplicateDataException {
         validator.validateInputFile(file);
-        getEntitiesFromFile(file);
+        LocalDateTime lastModified = LocalDateTime.now();
+        final List<Employee> entitiesFromFile = getEntitiesFromFile(file, lastModified);
+        return repository.saveAll(entitiesFromFile);
     }
 
-    protected List<Employee> getEntitiesFromFile(MultipartFile file) throws IOException, DuplicateDataException {
-        LocalDateTime lastModified = LocalDateTime.now();
+    protected List<Employee> getEntitiesFromFile(MultipartFile file, LocalDateTime lastModified) throws IOException, DuplicateDataException {
+
         final List<CSVRecord> records = processCSVFile(file);
         List<Employee> employeesToSave = records.stream().map(r -> {
             try {
@@ -61,8 +70,6 @@ public class EmployeeService {
              CSVParser csvParser = new CSVParser(fileReader,
                      CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim().withCommentMarker('#'))) {
             records = csvParser.getRecords();
-
-
         }
         return records;
     }
@@ -78,9 +85,9 @@ public class EmployeeService {
     }
 
     private Employee createEmployee(CSVRecord record, LocalDateTime lastModified) throws InvalidFieldException {
-        final String id = validator.validateAndGetId(record.get("id"), "id");
-        final String login = validator.validateAndGetLogin(record.get("login"), "login");
-        final String name = validator.validateAndGetName(record.get("name"), "name");
+        final String id = validator.validateId(record.get("id"), "id");
+        final String login = validator.validateLogin(record.get("login"), "login");
+        final String name = validator.validateName(record.get("name"), "name");
         final Double salary = validator.validateAndGetSalary(record.get("salary"), "salary");
         final LocalDate startDate = validator.validateAndGetStartDate(record.get("startDate"), "startDate");
         return new Employee(id, login, name, salary, startDate, lastModified);

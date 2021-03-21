@@ -2,11 +2,9 @@ package com.department.hr.employeeManagement.validators;
 
 import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
-import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -22,25 +20,24 @@ public class EmployeeValidator {
     public void validateInputFile(MultipartFile file) throws FileFormatException {
         if (!CONTENT_TYPE_TEXT_CSV.equalsIgnoreCase(file.getContentType())) {
             throw new FileFormatException("The input file provided is not of a valid format. Please upload a csv file only");
-
         }
     }
 
-    public String validateAndGetId(String id, String fieldName) throws InvalidFieldException {
-        if (isNull(id, "id") || id.matches("[A-Za-z0-9]")) {
-            throw new InvalidFieldException(String.format("Invalid id %s, only alphanumeric values are allowed for id"));
+    public String validateId(String id, String fieldName) throws InvalidFieldException {
+        if (isNull(id, fieldName) || !id.matches("[A-Za-z0-9]+")) {
+            throw new InvalidFieldException(String.format("Invalid id %s, only alphanumeric values are allowed for id", id));
         }
         return id;
     }
 
-    public String validateAndGetLogin(String login, String fieldName) throws InvalidFieldException {
-        if (isNull(login, fieldName) || !login.matches("[A-Za-z0-9]")) {
-            throw new InvalidFieldException(String.format("Invalid login %s, only alphanumeric values are allowed for login"));
+    public String validateLogin(String login, String fieldName) throws InvalidFieldException {
+        if (isNull(login, fieldName) || !login.matches("[A-Za-z0-9]+")) {
+            throw new InvalidFieldException(String.format("Invalid login %s, only alphanumeric values are allowed for login", login));
         }
         return login;
     }
 
-    public String validateAndGetName(String name, String fieldName) throws InvalidFieldException {
+    public String validateName(String name, String fieldName) throws InvalidFieldException {
         isNull(name, fieldName);
         return name;
     }
