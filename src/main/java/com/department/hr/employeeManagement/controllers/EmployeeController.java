@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -59,13 +60,23 @@ public class EmployeeController {
                                        @RequestParam(required = false, name = "limit", defaultValue = "0") Integer limit,
                                        @RequestParam(required = false, name = "orderByfieldAndDirection", defaultValue = "id-asc") String sortFieldsAndDirection) {
 
-        List<Employee> employeeList = null;
+        List<Employee> employeeList;
         try {
             employeeList = service.fetchEmployees(minSalary, maxSalary, offset, limit, sortFieldsAndDirection);
-        } catch (BadInputException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof BadInputException) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+            }
         }
-        return ResponseEntity.ok(employeeList);
+        return ResponseEntity.ok(createResponse(employeeList));
+    }
+
+    private HashMap<String, List<Employee>> createResponse(List<Employee> employeeList) {
+        final HashMap<String, List<Employee>> response = new HashMap<>();
+        response.put("response", employeeList);
+        return response;
     }
 
 }

@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
-    Page findBySalaryGreaterThanEqualAndSalaryLessThan(Double minSalary, Double maxSalary, Pageable pageable);
+    Page<Employee> findBySalaryGreaterThanEqualAndSalaryLessThan(Double minSalary, Double maxSalary, Pageable pageable);
 }

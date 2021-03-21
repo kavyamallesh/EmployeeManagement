@@ -98,19 +98,19 @@ public class EmployeeService {
         return new Employee(id, login, name, salary, startDate);
     }
 
-    public List<Employee> fetchEmployees(Double minSalary, Double maxSalary, Integer offset, Integer limit, String sortFieldsAndDirection) throws BadInputException {
+    public List<Employee> fetchEmployees(Double minSalary, Double maxSalary, Integer offset, Integer limit, String sortFieldsAndDirection) {
         final List<Sort.Order> sortOrderList = getSortOrderList(sortFieldsAndDirection);
 
         if (limit > 0) {
             Pageable pageable = new OffsetBasedPageRequest(offset, limit, Sort.by(sortOrderList));
             final Page<Employee> pagedResults = repository.findBySalaryGreaterThanEqualAndSalaryLessThan(minSalary, maxSalary, pageable);
-            return pagedResults != null ? pagedResults.getContent() : null;
+            return pagedResults != null ? pagedResults.getContent() : Collections.emptyList();
         }
         final Page<Employee> sortedResults = repository.findBySalaryGreaterThanEqualAndSalaryLessThan(minSalary, maxSalary, SortedUnpaged.getInstance(Sort.by(sortOrderList)));
-        return sortedResults != null ? sortedResults.getContent() : null;
+        return sortedResults != null ? sortedResults.getContent() : Collections.emptyList();
     }
 
-    protected List<Sort.Order> getSortOrderList(String sortFieldsWithDirection) throws BadInputException {
+    protected List<Sort.Order> getSortOrderList(String sortFieldsWithDirection) {
         return Arrays.stream(sortFieldsWithDirection.split(","))
                 .map(s -> s.split("-"))
                 .map(f -> getSortFieldAndDirection(f))
