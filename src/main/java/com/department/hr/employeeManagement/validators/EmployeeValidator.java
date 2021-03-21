@@ -1,13 +1,19 @@
 package com.department.hr.employeeManagement.validators;
 
+import com.department.hr.employeeManagement.entity.Employee;
+import com.department.hr.employeeManagement.exceptions.BadInputException;
 import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class EmployeeValidator {
@@ -15,6 +21,7 @@ public class EmployeeValidator {
     public static final String CONTENT_TYPE_TEXT_CSV = "text/csv";
     public static final DateTimeFormatter YYYY_MM_DD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final DateTimeFormatter DD_MMMM_YY = DateTimeFormatter.ofPattern("dd-MMM-yy");
+    public static final List<String> FIELDS = Arrays.stream(Employee.class.getDeclaredFields()).map(Field::getName).collect(Collectors.toList());
 
 
     public void validateInputFile(MultipartFile file) throws FileFormatException {
@@ -81,4 +88,12 @@ public class EmployeeValidator {
         return false;
     }
 
+    public void validateSortField(String field) throws BadInputException {
+        if (field == null || field.trim().equalsIgnoreCase(""))  {
+            throw new BadInputException("Sort field cannot be empty with just direction specified");
+        }
+        if(!FIELDS.contains(field)){
+            throw new BadInputException("Can sort based on one of the following columns "+FIELDS);
+        }
+    }
 }

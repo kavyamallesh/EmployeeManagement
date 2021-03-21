@@ -1,6 +1,7 @@
 package com.department.hr.employeeManagement.service;
 
 import com.department.hr.employeeManagement.entity.Employee;
+import com.department.hr.employeeManagement.exceptions.BadInputException;
 import com.department.hr.employeeManagement.exceptions.DuplicateDataException;
 import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
@@ -11,6 +12,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -92,7 +95,31 @@ public class EmployeeService {
     }
 
 
-    public List<Employee> fetchEmployees(Double minSalary, Double maxSalary, Integer offset, Integer limit, String sortFieldsAndDirection) {
+    public List<Employee> fetchEmployees(Double minSalary, Double maxSalary, Integer offset, Integer limit, String sortFieldsAndDirection) throws BadInputException {
+        final List<Sort.Order> sortOrderList = getSortOrderList(sortFieldsAndDirection);
         return null;
     }
+
+    protected List<Sort.Order> getSortOrderList(String sortFieldsWithDirection) throws BadInputException {
+        return Arrays.stream(sortFieldsWithDirection.split(","))
+                .map(s -> s.split("-"))
+                .map(f -> getSortFieldAndDirection(f))
+                .collect(Collectors.toList());
+    }
+
+    private Sort.Order getSortFieldAndDirection(String[] fieldWithDirection) {
+        final String field = fieldWithDirection[0];
+        final String direction = fieldWithDirection.length ==2 ? fieldWithDirection[1] : null;
+        try {
+            validator.validateSortField(field);
+        } catch (BadInputException e) {
+            throw new RuntimeException(e);
+        }
+        return new Sort.Order(getDirection(direction), field);
+    }
+
+    private Sort.Direction getDirection(String direction) {
+        return direction != null && direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+    }
+
 }

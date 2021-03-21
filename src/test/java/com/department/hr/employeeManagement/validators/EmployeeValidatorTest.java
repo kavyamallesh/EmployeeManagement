@@ -1,5 +1,6 @@
 package com.department.hr.employeeManagement.validators;
 
+import com.department.hr.employeeManagement.exceptions.BadInputException;
 import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
 import org.junit.jupiter.api.Test;
@@ -67,7 +68,7 @@ class EmployeeValidatorTest {
     }
 
     @Test
-    public void shouldThrowInvalidFieldExceptionWhenIdIsNullOrNotAlphaNumeric() throws InvalidFieldException {
+    public void shouldThrowInvalidFieldExceptionWhenIdIsNullOrNotAlphaNumeric() {
         assertThrows(InvalidFieldException.class, ()->validator.validateId(null, "id"));
         assertThrows(InvalidFieldException.class, ()->validator.validateId("344,8", "id"));
     }
@@ -78,11 +79,15 @@ class EmployeeValidatorTest {
     }
 
     @Test
-    public void shouldThrowInvalidFieldExceptionWhenLoginIsNullOrNotAlphaNumeric() throws InvalidFieldException {
+    public void shouldThrowInvalidFieldExceptionWhenLoginIsNullOrNotAlphaNumeric() {
         assertThrows(InvalidFieldException.class, ()->validator.validateId(null, "id"));
         assertThrows(InvalidFieldException.class, ()->validator.validateId("sara_tan", "id"));
     }
 
-
+    @Test
+    public void shouldThrowBadInputExceptionWhenSortFieldIsNullOrEmptyOrNotPresentInTheEntity() {
+        assertThrows(BadInputException.class, ()-> validator.validateSortField("  "));
+        assertThrows(BadInputException.class, ()-> validator.validateSortField("something"));
+    }
 
 }

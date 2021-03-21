@@ -1,6 +1,7 @@
 package com.department.hr.employeeManagement.controllers;
 
 import com.department.hr.employeeManagement.entity.Employee;
+import com.department.hr.employeeManagement.exceptions.BadInputException;
 import com.department.hr.employeeManagement.exceptions.DuplicateDataException;
 import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
@@ -58,8 +59,12 @@ public class EmployeeController {
                                        @RequestParam(required = false, name = "limit", defaultValue = "0") Integer limit,
                                        @RequestParam(required = false, name = "orderByfieldAndDirection", defaultValue = "id-asc") String sortFieldsAndDirection) {
 
-        //TODO : define your own filters and sorting
-        List<Employee> employeeList = service.fetchEmployees(minSalary, maxSalary, offset, limit, sortFieldsAndDirection);
+        List<Employee> employeeList = null;
+        try {
+            employeeList = service.fetchEmployees(minSalary, maxSalary, offset, limit, sortFieldsAndDirection);
+        } catch (BadInputException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok(employeeList);
     }
 
