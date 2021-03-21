@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -42,17 +41,16 @@ public class EmployeeService {
 
     public List uploadData(MultipartFile file) throws FileFormatException, IOException, DuplicateDataException {
         validator.validateInputFile(file);
-        LocalDateTime lastModified = LocalDateTime.now();
-        final List<Employee> entitiesFromFile = getEntitiesFromFile(file, lastModified);
+        final List<Employee> entitiesFromFile = getEntitiesFromFile(file);
         return repository.saveAll(entitiesFromFile);
     }
 
-    protected List<Employee> getEntitiesFromFile(MultipartFile file, LocalDateTime lastModified) throws IOException, DuplicateDataException {
+    protected List<Employee> getEntitiesFromFile(MultipartFile file) throws IOException, DuplicateDataException {
 
         final List<CSVRecord> records = processCSVFile(file);
         List<Employee> employeesToSave = records.stream().map(r -> {
             try {
-                return createEmployee(r, lastModified);
+                return createEmployee(r);
             } catch (InvalidFieldException e) {
                 throw new RuntimeException(e);
             }
@@ -84,13 +82,17 @@ public class EmployeeService {
         }
     }
 
-    private Employee createEmployee(CSVRecord record, LocalDateTime lastModified) throws InvalidFieldException {
+    private Employee createEmployee(CSVRecord record) throws InvalidFieldException {
         final String id = validator.validateId(record.get("id"), "id");
         final String login = validator.validateLogin(record.get("login"), "login");
         final String name = validator.validateName(record.get("name"), "name");
         final Double salary = validator.validateAndGetSalary(record.get("salary"), "salary");
         final LocalDate startDate = validator.validateAndGetStartDate(record.get("startDate"), "startDate");
-        return new Employee(id, login, name, salary, startDate, lastModified);
+        return new Employee(id, login, name, salary, startDate);
     }
 
+
+    public List<Employee> fetchEmployees(Double minSalary, Double maxSalary, Integer offset, Integer limit, String sortFieldsAndDirection) {
+        return null;
+    }
 }

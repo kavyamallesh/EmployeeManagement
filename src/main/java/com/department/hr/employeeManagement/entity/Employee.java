@@ -1,6 +1,5 @@
 package com.department.hr.employeeManagement.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -31,8 +29,5 @@ public class Employee {
 
     @Column(nullable = false)
     private LocalDate startDate;
-
-    @JsonIgnore
-    private LocalDateTime lastModifiedAt;
 
 }
