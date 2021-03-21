@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -132,4 +133,11 @@ public class EmployeeService {
         return direction != null && direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
     }
 
+    public Employee getEmployeeById(String id) throws BadInputException {
+        final Optional<Employee> employee = repository.findById(id);
+       if(!employee.isPresent()){
+           throw new BadInputException("No such employee");
+       }
+       return employee.get();
+    }
 }
