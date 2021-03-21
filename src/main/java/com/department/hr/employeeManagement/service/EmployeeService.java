@@ -135,9 +135,51 @@ public class EmployeeService {
 
     public Employee getEmployeeById(String id) throws BadInputException {
         final Optional<Employee> employee = repository.findById(id);
-       if(!employee.isPresent()){
-           throw new BadInputException("No such employee");
-       }
-       return employee.get();
+        if (!employee.isPresent()) {
+            throw new BadInputException("No such employee");
+        }
+        return employee.get();
+    }
+
+    public String creatEmployee(Employee employee) throws InvalidFieldException, BadInputException {
+        final String id = employee.getId();
+        validator.validateId(id, "id");
+        if (repository.existsById(employee.getId())) {
+            throw new BadInputException("Employee ID already exists");
+        }
+        final String login = employee.getLogin();
+        validator.validateId(id, "id");
+        if (repository.existsByLogin(login)) {
+            throw new BadInputException("Employee login not unique");
+        }
+        validator.validateSalary(employee.getSalary());
+
+        //TODO: validate date even before coming here
+        final Employee newEmployee = repository.save(employee);
+
+        return newEmployee.getId();
+    }
+
+    public String updateEmployee(Employee employee) throws BadInputException, InvalidFieldException {
+
+        if (!repository.existsById(employee.getId())) {
+            throw new BadInputException("No such employee");
+        }
+        if (repository.existsByLogin(employee.getLogin())) {
+            throw new BadInputException("Employee login not unique");
+        }
+        validator.validateSalary(employee.getSalary());
+
+        //TODO : validate start date
+        final Employee updatedEmployee = repository.save(employee);
+        return updatedEmployee.getId();
+
+    }
+
+    public void deleteEmployee(String id) throws BadInputException {
+        if (!repository.existsById(id)) {
+            throw new BadInputException("No such employee");
+        }
+        repository.deleteById(id);
     }
 }

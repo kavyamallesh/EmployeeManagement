@@ -57,10 +57,9 @@ public class EmployeeValidator {
             } catch (NumberFormatException e) {
                 throw new InvalidFieldException("salary should be a number, but is "+salary);
             }
+            validateSalary(val);
 
-            if(val < 0.0){
-                throw new InvalidFieldException(String.format("Invalid salary %s, salary should be greater than 0", salary));
-            }
+
         }
         return 1d;
     }
@@ -94,6 +93,12 @@ public class EmployeeValidator {
         }
         if(!FIELDS.contains(field)){
             throw new BadInputException("Can sort based on one of the following columns "+FIELDS);
+        }
+    }
+
+    public void validateSalary(Double salary) throws InvalidFieldException {
+        if(salary < 0.0){
+            throw new InvalidFieldException(String.format("Invalid salary %s, salary should be greater than 0", salary));
         }
     }
 }

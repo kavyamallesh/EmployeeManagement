@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
     Page<Employee> findBySalaryGreaterThanEqualAndSalaryLessThan(Double minSalary, Double maxSalary, Pageable pageable);
+    boolean existsByLogin(String login);
 }
