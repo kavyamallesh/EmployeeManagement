@@ -1,5 +1,7 @@
 package com.department.hr.employeeManagement.service;
 
+import com.department.hr.employeeManagement.domain.OffsetBasedPageRequest;
+import com.department.hr.employeeManagement.domain.SortedUnpaged;
 import com.department.hr.employeeManagement.entity.Employee;
 import com.department.hr.employeeManagement.exceptions.BadInputException;
 import com.department.hr.employeeManagement.exceptions.DuplicateDataException;
@@ -12,6 +14,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -94,10 +98,16 @@ public class EmployeeService {
         return new Employee(id, login, name, salary, startDate);
     }
 
-
     public List<Employee> fetchEmployees(Double minSalary, Double maxSalary, Integer offset, Integer limit, String sortFieldsAndDirection) throws BadInputException {
         final List<Sort.Order> sortOrderList = getSortOrderList(sortFieldsAndDirection);
-        return null;
+
+        if (limit > 0) {
+            Pageable pageable = new OffsetBasedPageRequest(offset, limit, Sort.by(sortOrderList));
+            final Page<Employee> pagedResults = repository.findBySalaryGreaterThanEqualAndSalaryLessThan(minSalary, maxSalary, pageable);
+            return pagedResults != null ? pagedResults.getContent() : null;
+        }
+        final Page<Employee> sortedResults = repository.findBySalaryGreaterThanEqualAndSalaryLessThan(minSalary, maxSalary, SortedUnpaged.getInstance(Sort.by(sortOrderList)));
+        return sortedResults != null ? sortedResults.getContent() : null;
     }
 
     protected List<Sort.Order> getSortOrderList(String sortFieldsWithDirection) throws BadInputException {
@@ -109,7 +119,7 @@ public class EmployeeService {
 
     private Sort.Order getSortFieldAndDirection(String[] fieldWithDirection) {
         final String field = fieldWithDirection[0];
-        final String direction = fieldWithDirection.length ==2 ? fieldWithDirection[1] : null;
+        final String direction = fieldWithDirection.length == 2 ? fieldWithDirection[1] : null;
         try {
             validator.validateSortField(field);
         } catch (BadInputException e) {
