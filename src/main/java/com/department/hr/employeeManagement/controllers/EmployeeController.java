@@ -9,7 +9,6 @@ import com.department.hr.employeeManagement.service.EmployeeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,25 +35,13 @@ public class EmployeeController {
     private final EmployeeService service;
 
     @PostMapping("/upload")
-    public ResponseEntity uploadCSV(@RequestParam("file") MultipartFile file) {
-        try {
-            log.info("Received request for upload");
-            final List employeesSaved = service.uploadData(file);
-            if (employeesSaved.size() > 0) {
-                return ResponseEntity.ok("Successful");
-            }
-            return ResponseEntity.status(201).body("Success but no data updated");
-        } catch (FileFormatException | DuplicateDataException e) {
-            return ResponseEntity.badRequest().body("Bad input -" + e.getMessage());
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(e.getMessage());
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof InvalidFieldException) {
-                return ResponseEntity.badRequest().body("Bad input -" + e.getMessage());
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(e.getMessage());
-            }
+    public ResponseEntity uploadCSV(@RequestParam("file") MultipartFile file) throws FileFormatException, IOException, DuplicateDataException {
+        log.info("Received request for upload");
+        final List employeesSaved = service.uploadData(file);
+        if (employeesSaved.size() > 0) {
+            return ResponseEntity.ok("Successful");
         }
+        return ResponseEntity.status(201).body("Success but no data updated");
     }
 
     @GetMapping
@@ -65,58 +52,32 @@ public class EmployeeController {
                                        @RequestParam(required = false, name = "orderByfieldAndDirection", defaultValue = "id-asc") String sortFieldsAndDirection) {
 
         List<Employee> employeeList;
-        try {
-            employeeList = service.fetchEmployees(minSalary, maxSalary, offset, limit, sortFieldsAndDirection);
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof BadInputException) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
-            }
-        }
+        employeeList = service.fetchEmployees(minSalary, maxSalary, offset, limit, sortFieldsAndDirection);
         return ResponseEntity.ok(createResponse(employeeList));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity getEmployee(@PathVariable("id") String id) {
-        try {
-            Employee employee = service.getEmployeeById(id);
-            return ResponseEntity.ok(employee);
-        } catch (BadInputException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
-        }
+    public ResponseEntity getEmployee(@PathVariable("id") String id) throws BadInputException {
+        Employee employee = service.getEmployeeById(id);
+        return ResponseEntity.ok(employee);
     }
 
     @PostMapping
-    public ResponseEntity createEmployee(@RequestBody Employee employee) {
-        try {
-            final String employeeId = service.creatEmployee(employee);
-            return ResponseEntity.ok("Successfully created");
-        } catch (InvalidFieldException | BadInputException e) {
-            return ResponseEntity.badRequest().body(e.getLocalizedMessage());
-        }
+    public ResponseEntity createEmployee(@RequestBody Employee employee) throws InvalidFieldException, BadInputException, Exception {
+        final String employeeId = service.creatEmployee(employee);
+        return ResponseEntity.ok("Successfully created");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity updateEmployee(@RequestBody Employee employee) {
-        try {
-            final String employeeId = service.updateEmployee(employee);
-            return ResponseEntity.ok("Successfully updated");
-        } catch (InvalidFieldException | BadInputException e) {
-            return ResponseEntity.badRequest().body(e.getLocalizedMessage());
-        }
+    public ResponseEntity updateEmployee(@RequestBody Employee employee) throws BadInputException, InvalidFieldException {
+        final String employeeId = service.updateEmployee(employee);
+        return ResponseEntity.ok("Successfully updated");
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity deleteEmployee(@PathVariable("id") String id) {
-        try {
-            service.deleteEmployee(id);
-            return ResponseEntity.ok("Successfully deleted");
-        } catch (BadInputException e) {
-            return ResponseEntity.badRequest().body(e.getLocalizedMessage());
-        }
+    public ResponseEntity deleteEmployee(@PathVariable("id") String id) throws BadInputException {
+        service.deleteEmployee(id);
+        return ResponseEntity.ok("Successfully deleted");
     }
 
     private HashMap<String, List<Employee>> createResponse(List<Employee> employeeList) {
