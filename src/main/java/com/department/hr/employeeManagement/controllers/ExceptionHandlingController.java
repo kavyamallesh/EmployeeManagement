@@ -19,7 +19,6 @@ public class ExceptionHandlingController {
 
     @ExceptionHandler({BadInputException.class, MissingServletRequestPartException.class, InvalidFieldException.class, RuntimeException.class, FileFormatException.class, DuplicateDataException.class})
     public ResponseEntity badInputErrorHandler(Exception e) {
-        log.error("this is a bad input" + e.getCause().getMessage());
         return ResponseEntity.badRequest().body(e.getCause().getMessage());
     }
 
