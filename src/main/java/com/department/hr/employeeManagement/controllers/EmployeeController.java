@@ -1,5 +1,6 @@
 package com.department.hr.employeeManagement.controllers;
 
+import com.department.hr.employeeManagement.input.InputEmployee;
 import com.department.hr.employeeManagement.entity.Employee;
 import com.department.hr.employeeManagement.exceptions.BadInputException;
 import com.department.hr.employeeManagement.exceptions.DuplicateDataException;
@@ -64,13 +65,13 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity createEmployee(@Valid @RequestBody Employee employee) throws InvalidFieldException, BadInputException, Exception {
+    public ResponseEntity createEmployee(@Valid @RequestBody InputEmployee employee) throws InvalidFieldException, BadInputException, Exception {
         final String employeeId = service.creatEmployee(employee);
         return ResponseEntity.ok("Successfully created");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity updateEmployee(@RequestBody Employee employee) throws BadInputException, InvalidFieldException {
+    public ResponseEntity updateEmployee(@RequestBody InputEmployee employee) throws BadInputException, InvalidFieldException {
         final String employeeId = service.updateEmployee(employee);
         return ResponseEntity.ok("Successfully updated");
     }

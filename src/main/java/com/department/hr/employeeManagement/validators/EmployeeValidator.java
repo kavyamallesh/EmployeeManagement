@@ -50,18 +50,16 @@ public class EmployeeValidator {
     }
 
     public Double validateAndGetSalary(String salary, String fieldName) throws InvalidFieldException {
-        final Double val;
+        Double val = -1d;
         if (!isNull(salary, fieldName)) {
             try {
                 val = Double.parseDouble(salary);
             } catch (NumberFormatException e) {
-                throw new InvalidFieldException("salary should be a number, but is "+salary);
+                throw new InvalidFieldException("salary should be a number, but is " + salary);
             }
             validateSalary(val);
-
-
         }
-        return 1d;
+        return val;
     }
 
     public LocalDate validateAndGetStartDate(String startDateString, String fieldName) throws InvalidFieldException {
@@ -88,16 +86,16 @@ public class EmployeeValidator {
     }
 
     public void validateSortField(String field) throws BadInputException {
-        if (field == null || field.trim().equalsIgnoreCase(""))  {
+        if (field == null || field.trim().equalsIgnoreCase("")) {
             throw new BadInputException("Sort field cannot be empty with just direction specified");
         }
-        if(!FIELDS.contains(field)){
-            throw new BadInputException("Can sort based on one of the following columns "+FIELDS);
+        if (!FIELDS.contains(field)) {
+            throw new BadInputException("Can sort based on one of the following columns " + FIELDS);
         }
     }
 
     public void validateSalary(Double salary) throws InvalidFieldException {
-        if(salary < 0.0){
+        if (salary < 0.0) {
             throw new InvalidFieldException(String.format("Invalid salary %s, salary should be greater than 0", salary));
         }
     }

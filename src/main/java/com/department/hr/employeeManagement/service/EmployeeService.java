@@ -1,5 +1,6 @@
 package com.department.hr.employeeManagement.service;
 
+import com.department.hr.employeeManagement.input.InputEmployee;
 import com.department.hr.employeeManagement.domain.OffsetBasedPageRequest;
 import com.department.hr.employeeManagement.domain.SortedUnpaged;
 import com.department.hr.employeeManagement.entity.Employee;
@@ -141,36 +142,40 @@ public class EmployeeService {
         return employee.get();
     }
 
-    public String creatEmployee(Employee employee) throws InvalidFieldException, BadInputException {
-        final String id = employee.getId();
+    public String creatEmployee(InputEmployee inputEmployee) throws InvalidFieldException, BadInputException {
+        final String id = inputEmployee.getId();
         validator.validateId(id, "id");
-        if (repository.existsById(employee.getId())) {
+        if (repository.existsById(inputEmployee.getId())) {
             throw new BadInputException("Employee ID already exists");
         }
-        final String login = employee.getLogin();
+        final String login = inputEmployee.getLogin();
         validator.validateId(id, "id");
         if (repository.existsByLogin(login)) {
             throw new BadInputException("Employee login not unique");
         }
-        validator.validateSalary(employee.getSalary());
+        Double salary = validator.validateAndGetSalary(inputEmployee.getSalary(), "salary");
 
-        //TODO: validate date even before coming here
+        LocalDate startDate = validator.validateAndGetStartDate(inputEmployee.getStartDate(), "startDate");
+
+        Employee employee = new Employee(inputEmployee.getId(), inputEmployee.getLogin(), inputEmployee.getName(), salary, startDate);
         final Employee newEmployee = repository.save(employee);
 
         return newEmployee.getId();
     }
 
-    public String updateEmployee(Employee employee) throws BadInputException, InvalidFieldException {
+    public String updateEmployee(InputEmployee inputEmployee) throws BadInputException, InvalidFieldException {
 
-        if (!repository.existsById(employee.getId())) {
+        if (!repository.existsById(inputEmployee.getId())) {
             throw new BadInputException("No such employee");
         }
-        if (repository.existsByLogin(employee.getLogin())) {
+        if (repository.existsByLogin(inputEmployee.getLogin())) {
             throw new BadInputException("Employee login not unique");
         }
-        validator.validateSalary(employee.getSalary());
+        Double salary = validator.validateAndGetSalary(inputEmployee.getSalary(), "salary");
 
-        //TODO : validate start date
+        LocalDate startDate = validator.validateAndGetStartDate(inputEmployee.getStartDate(), "startDate");
+
+        Employee employee = new Employee(inputEmployee.getId(), inputEmployee.getLogin(), inputEmployee.getName(), salary, startDate);
         final Employee updatedEmployee = repository.save(employee);
         return updatedEmployee.getId();
 
