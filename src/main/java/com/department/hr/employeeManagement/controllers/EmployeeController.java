@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +64,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity createEmployee(@RequestBody Employee employee) throws InvalidFieldException, BadInputException, Exception {
+    public ResponseEntity createEmployee(@Valid @RequestBody Employee employee) throws InvalidFieldException, BadInputException, Exception {
         final String employeeId = service.creatEmployee(employee);
         return ResponseEntity.ok("Successfully created");
     }
@@ -82,7 +83,7 @@ public class EmployeeController {
 
     private HashMap<String, List<Employee>> createResponse(List<Employee> employeeList) {
         final HashMap<String, List<Employee>> response = new HashMap<>();
-        response.put("response", employeeList);
+        response.put("results", employeeList);
         return response;
     }
 

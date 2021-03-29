@@ -153,7 +153,7 @@ class EmployeeControllerTest {
     @Test
     void shouldGetAllEmployees() throws Exception {
         Map result = new HashMap<>();
-        result.put("response", Collections.singletonList(employee));
+        result.put("results", Collections.singletonList(employee));
         this.mockMvc
                 .perform(get("/users"))
                 .andExpect(status().isOk())
