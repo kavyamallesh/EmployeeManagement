@@ -7,6 +7,7 @@ import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
 import com.department.hr.employeeManagement.input.UpdateEmployee;
 import com.department.hr.employeeManagement.service.EmployeeService;
+import com.department.hr.employeeManagement.vo.Results;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -74,10 +74,10 @@ public class EmployeeController {
         return ResponseEntity.ok("Successfully deleted");
     }
 
-    private HashMap<String, List<Employee>> createResponse(List<Employee> employeeList) {
-        final HashMap<String, List<Employee>> response = new HashMap<>();
-        response.put("results", employeeList);
-        return response;
+    private Results createResponse(List<Employee> employeeList) {
+        Results results = new Results();
+        results.setResults(employeeList);
+        return results;
     }
 
 }

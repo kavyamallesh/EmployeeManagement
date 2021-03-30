@@ -36,7 +36,15 @@ public class Employee {
     private Double salary;
 
     @NotNull(message = "Invalid date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "[yyyy-MM-dd][dd-MMM-yy]")
     private LocalDate startDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "[yyyy-MM-dd]")
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "[yyyy-MM-dd][dd-MMM-yy]")
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 }
