@@ -2,7 +2,10 @@ package com.department.hr.employeeManagement.service;
 
 import com.department.hr.employeeManagement.domain.OffsetBasedPageRequest;
 import com.department.hr.employeeManagement.domain.SortedUnpaged;
+import com.department.hr.employeeManagement.entity.Employee;
 import com.department.hr.employeeManagement.exceptions.BadInputException;
+import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
+import com.department.hr.employeeManagement.input.UpdateEmployee;
 import com.department.hr.employeeManagement.repository.EmployeeRepository;
 import com.department.hr.employeeManagement.validators.EmployeeValidator;
 import org.apache.commons.csv.CSVRecord;
@@ -17,17 +20,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
@@ -111,6 +112,24 @@ class EmployeeServiceTest {
 
         assertEquals(SortedUnpaged.class, pageableArgumentCaptor.getValue().getClass());
 
+    }
+
+    @Test
+    void shouldThrowBadInputExceptionWhenLoginIsNotUnique() {
+        Employee employee = new Employee("e1", "uniqueLogin", "new name", 345d, LocalDate.now());
+        UpdateEmployee updateEmployee = new UpdateEmployee("duplicateLogin", "new name", 345d, LocalDate.now());
+
+        when(repository.findById(eq("e1"))).thenReturn(Optional.of(employee));
+        when(repository.existsByLogin(eq("duplicateLogin"))).thenReturn(true);
+        assertThrows(BadInputException.class, () -> service.updateEmployee("e1", updateEmployee));
+    }
+
+    @Test
+    void shouldNotThrowExceptionWhenLoginIsSameAsExistingLogin() throws BadInputException, InvalidFieldException {
+        Employee employee = new Employee("e1", "uniqueLogin", "new name", 345d, LocalDate.now());
+        UpdateEmployee updateEmployee = new UpdateEmployee("uniqueLogin", "new name", 345d, LocalDate.now());
+        when(repository.findById(eq("e1"))).thenReturn(Optional.of(employee));
+        service.updateEmployee("e1", updateEmployee);
     }
 
 }

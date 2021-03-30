@@ -1,25 +1,17 @@
 package com.department.hr.employeeManagement.controllers;
 
-import com.department.hr.employeeManagement.input.InputEmployee;
 import com.department.hr.employeeManagement.entity.Employee;
 import com.department.hr.employeeManagement.exceptions.BadInputException;
 import com.department.hr.employeeManagement.exceptions.DuplicateDataException;
 import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
+import com.department.hr.employeeManagement.input.UpdateEmployee;
 import com.department.hr.employeeManagement.service.EmployeeService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -65,14 +57,14 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity createEmployee(@Valid @RequestBody InputEmployee employee) throws InvalidFieldException, BadInputException, Exception {
-        final String employeeId = service.creatEmployee(employee);
+    public ResponseEntity createEmployee(@Valid @RequestBody Employee employee) throws InvalidFieldException, BadInputException, Exception {
+        final String employeeId = service.createEmployee(employee);
         return ResponseEntity.ok("Successfully created");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity updateEmployee(@RequestBody InputEmployee employee) throws BadInputException, InvalidFieldException {
-        final String employeeId = service.updateEmployee(employee);
+    public ResponseEntity updateEmployee(@PathVariable("id") String id, @Valid @RequestBody UpdateEmployee employee) throws BadInputException, InvalidFieldException {
+        service.updateEmployee(id, employee);
         return ResponseEntity.ok("Successfully updated");
     }
 

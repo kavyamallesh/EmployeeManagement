@@ -1,6 +1,5 @@
 package com.department.hr.employeeManagement.service;
 
-import com.department.hr.employeeManagement.input.InputEmployee;
 import com.department.hr.employeeManagement.domain.OffsetBasedPageRequest;
 import com.department.hr.employeeManagement.domain.SortedUnpaged;
 import com.department.hr.employeeManagement.entity.Employee;
@@ -8,6 +7,7 @@ import com.department.hr.employeeManagement.exceptions.BadInputException;
 import com.department.hr.employeeManagement.exceptions.DuplicateDataException;
 import com.department.hr.employeeManagement.exceptions.FileFormatException;
 import com.department.hr.employeeManagement.exceptions.InvalidFieldException;
+import com.department.hr.employeeManagement.input.UpdateEmployee;
 import com.department.hr.employeeManagement.repository.EmployeeRepository;
 import com.department.hr.employeeManagement.validators.EmployeeValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -142,7 +138,7 @@ public class EmployeeService {
         return employee.get();
     }
 
-    public String creatEmployee(InputEmployee inputEmployee) throws InvalidFieldException, BadInputException {
+    public String createEmployee(Employee inputEmployee) throws InvalidFieldException, BadInputException {
         final String id = inputEmployee.getId();
         validator.validateId(id, "id");
         if (repository.existsById(inputEmployee.getId())) {
@@ -153,32 +149,30 @@ public class EmployeeService {
         if (repository.existsByLogin(login)) {
             throw new BadInputException("Employee login not unique");
         }
-        Double salary = validator.validateAndGetSalary(inputEmployee.getSalary(), "salary");
-
-        LocalDate startDate = validator.validateAndGetStartDate(inputEmployee.getStartDate(), "startDate");
-
-        Employee employee = new Employee(inputEmployee.getId(), inputEmployee.getLogin(), inputEmployee.getName(), salary, startDate);
-        final Employee newEmployee = repository.save(employee);
+//        Double salary = validator.validateAndGetSalary(inputEmployee.getSalary(), "salary");
+//
+//        LocalDate startDate = validator.validateAndGetStartDate(inputEmployee.getStartDate(), "startDate");
+//
+//        Employee employee = new Employee(inputEmployee.getId(), inputEmployee.getLogin(), inputEmployee.getName(), salary, startDate);
+        final Employee newEmployee = repository.save(inputEmployee);
 
         return newEmployee.getId();
     }
 
-    public String updateEmployee(InputEmployee inputEmployee) throws BadInputException, InvalidFieldException {
+    public void updateEmployee(String id, UpdateEmployee updateEmployee) throws BadInputException, InvalidFieldException {
+        Optional<Employee> optionalEmployee = repository.findById(id);
 
-        if (!repository.existsById(inputEmployee.getId())) {
+        if (!optionalEmployee.isPresent()) {
             throw new BadInputException("No such employee");
         }
-        if (repository.existsByLogin(inputEmployee.getLogin())) {
+
+        Employee employeeToUpdate = optionalEmployee.get();
+
+        if (!employeeToUpdate.getLogin().equals(updateEmployee.getLogin()) && repository.existsByLogin(updateEmployee.getLogin())) {
             throw new BadInputException("Employee login not unique");
         }
-        Double salary = validator.validateAndGetSalary(inputEmployee.getSalary(), "salary");
-
-        LocalDate startDate = validator.validateAndGetStartDate(inputEmployee.getStartDate(), "startDate");
-
-        Employee employee = new Employee(inputEmployee.getId(), inputEmployee.getLogin(), inputEmployee.getName(), salary, startDate);
-        final Employee updatedEmployee = repository.save(employee);
-        return updatedEmployee.getId();
-
+        Employee employee = new Employee(id, updateEmployee.getLogin(), updateEmployee.getName(), updateEmployee.getSalary(), updateEmployee.getStartDate());
+        repository.save(employee);
     }
 
     public void deleteEmployee(String id) throws BadInputException {

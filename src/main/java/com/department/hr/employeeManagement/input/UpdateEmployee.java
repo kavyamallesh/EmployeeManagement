@@ -1,31 +1,19 @@
-package com.department.hr.employeeManagement.entity;
+package com.department.hr.employeeManagement.input;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class Employee {
+@AllArgsConstructor
+public class UpdateEmployee {
 
-    @Id
-    @Pattern(regexp = "[A-Za-z0-9]+", message = "Invalid id, id can only be alphanumeric")
-    private String id;
-
-    @Column(unique = true, nullable = false)
-    @Pattern(regexp = "[A-Za-z0-9]+", message = "Invalid login, login can only be alphanumeric")
     private String login;
 
     @NotNull(message = "Invalid name")
@@ -38,5 +26,4 @@ public class Employee {
     @NotNull(message = "Invalid date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "[yyyy-MM-dd][dd-MMM-yy]")
     private LocalDate startDate;
-
 }
