@@ -29,13 +29,13 @@ public class EmployeeController {
     private final EmployeeService service;
 
     @PostMapping("/upload")
-    public ResponseEntity uploadCSV(@RequestParam("file") MultipartFile file) throws FileFormatException, IOException, DuplicateDataException {
+    public ResponseEntity uploadCSV(@RequestParam("file") MultipartFile file) throws FileFormatException, IOException, DuplicateDataException, BadInputException {
         log.info("Received request for upload");
         final List employeesSaved = service.uploadData(file);
         if (employeesSaved.size() > 0) {
-            return ResponseEntity.ok("Successful");
+            return ResponseEntity.status(201).body("Data created or uploaded successfully");
         }
-        return ResponseEntity.status(201).body("Success but no data updated");
+        return ResponseEntity.status(200).body("Success but no data updated");
     }
 
     @GetMapping

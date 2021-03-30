@@ -66,10 +66,100 @@ class EmployeeControllerTest {
 
         this.mockMvc
                 .perform(multipart("/users/upload").file(file))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Successful"));
+                .andExpect(status().is(201))
+                .andExpect(content().string("Data created or uploaded successfully"));
 
         assertThat(repository.findAll().size()).isEqualTo(totalEntities + 2);
+    }
+
+    @Test
+    void shouldReturn200WhenNoDataModified() throws Exception {
+        int totalEntities = repository.findAll().size();
+        String content = "id,login, name,salary,startDate\n" +
+                "#e3,hy, Hyuk,8844.999,2020-03-12";
+        MockMultipartFile file
+                = new MockMultipartFile(
+                "file",
+                "hello.txt",
+                "text/csv",
+                content.getBytes()
+        );
+
+        this.mockMvc
+                .perform(multipart("/users/upload").file(file))
+                .andExpect(status().is(200))
+                .andExpect(content().string("Success but no data updated"));
+
+        assertThat(repository.findAll().size()).isEqualTo(totalEntities);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenFileContainsDuplicateIds() throws Exception {
+        int totalEntities = repository.findAll().size();
+        String content = "id,login, name,salary,startDate\n" +
+                "e1,j1, Jooni,134,2001-11-19,\n" +
+                "e1,h1, Hoon,404.5,2005-08-11,\n" +
+                "e3,hy, Hyuk,8844.999,2020-03-12";
+        MockMultipartFile file
+                = new MockMultipartFile(
+                "file",
+                "hello.txt",
+                "text/csv",
+                content.getBytes()
+        );
+
+        this.mockMvc
+                .perform(multipart("/users/upload").file(file))
+                .andExpect(status().is(400))
+                .andExpect(content().string("Duplicate ids detected - [e1]"));
+
+        assertThat(repository.findAll().size()).isEqualTo(totalEntities);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenFileContainsDuplicateLogins() throws Exception {
+        int totalEntities = repository.findAll().size();
+        String content = "id,login, name,salary,startDate\n" +
+                "e1,j1, Jooni,134,2001-11-19,\n" +
+                "e2,j1, Hoon,404.5,2005-08-11,\n" +
+                "e3,hy, Hyuk,8844.999,2020-03-12";
+        MockMultipartFile file
+                = new MockMultipartFile(
+                "file",
+                "hello.txt",
+                "text/csv",
+                content.getBytes()
+        );
+
+        this.mockMvc
+                .perform(multipart("/users/upload").file(file))
+                .andExpect(status().is(400))
+                .andExpect(content().string("Duplicate login ids detected - [j1]"));
+
+        assertThat(repository.findAll().size()).isEqualTo(totalEntities);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenFileContainsNonUniqueLogins() throws Exception {
+        int totalEntities = repository.findAll().size();
+        String content = "id,login, name,salary,startDate\n" +
+                "e1,j1, Jooni,134,2001-11-19,\n" +
+                "e2,h1, Hoon,404.5,2005-08-11,\n" +
+                "e3,harry1, Hyuk,8844.999,2020-03-12";
+        MockMultipartFile file
+                = new MockMultipartFile(
+                "file",
+                "hello.txt",
+                "text/csv",
+                content.getBytes()
+        );
+
+        this.mockMvc
+                .perform(multipart("/users/upload").file(file))
+                .andExpect(status().is(400))
+                .andExpect(content().string("Login id is not unique"));
+
+        assertThat(repository.findAll().size()).isEqualTo(totalEntities);
     }
 
     @Test

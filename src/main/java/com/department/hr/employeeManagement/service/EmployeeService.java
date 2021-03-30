@@ -44,14 +44,13 @@ public class EmployeeService {
         this.repository = repository;
     }
 
-    public List uploadData(MultipartFile file) throws FileFormatException, IOException, DuplicateDataException {
+    public List uploadData(MultipartFile file) throws FileFormatException, IOException, DuplicateDataException, BadInputException {
         validator.validateInputFile(file);
         final List<Employee> entitiesFromFile = getEntitiesFromFile(file);
         return repository.saveAll(entitiesFromFile);
     }
 
-    protected List<Employee> getEntitiesFromFile(MultipartFile file) throws IOException, DuplicateDataException {
-
+    protected List<Employee> getEntitiesFromFile(MultipartFile file) throws IOException, DuplicateDataException, BadInputException {
         final List<CSVRecord> records = processCSVFile(file);
         List<Employee> employeesToSave = records.stream().map(r -> {
             try {
@@ -63,7 +62,27 @@ public class EmployeeService {
 
         checkForDuplicateRecords(employeesToSave);
 
+        checkForNonUniqueLogin(employeesToSave);
         return employeesToSave;
+    }
+
+    private void checkForNonUniqueLogin(List<Employee> employeesToSave) throws DuplicateDataException, BadInputException {
+        final List<String> logins = employeesToSave.stream().map(Employee::getLogin).collect(Collectors.toList());
+
+        Set<String> duplicateLogins = logins.stream()
+                .filter(i -> Collections.frequency(logins, i) > 1)
+                .collect(Collectors.toSet());
+        if (duplicateLogins.size() != 0) {
+            throw new DuplicateDataException("Duplicate login ids detected - " + duplicateLogins);
+        }
+
+//        List<Employee> all = repository.findAll();
+//        Set<String> nonAvailableLoginIds = all.stream().map(Employee::getLogin).collect(Collectors.toSet());
+//        logins.retainAll(nonAvailableLoginIds);
+//        if (logins.size() > 0) {
+//            throw new BadInputException("Following login ids are unavailable - " + logins);
+//        }
+
     }
 
     protected List<CSVRecord> processCSVFile(MultipartFile file) throws IOException {
@@ -78,12 +97,16 @@ public class EmployeeService {
     }
 
     private void checkForDuplicateRecords(List<Employee> employeesToSave) throws DuplicateDataException {
-        final Set<String> ids = employeesToSave.stream().map(e -> e.getId())
-                .filter(i -> Collections.frequency(employeesToSave, i) > 1)
+        final List<String> ids = employeesToSave.stream()
+                .map(Employee::getId)
+                .collect(Collectors.toList());
+
+        Set<String> duplicateIds = ids.stream()
+                .filter(i -> Collections.frequency(ids, i) > 1)
                 .collect(Collectors.toSet());
 
-        if (ids.size() != 0) {
-            throw new DuplicateDataException("Duplicate rows detected for the following id(s) " + ids);
+        if (duplicateIds.size() != 0) {
+            throw new DuplicateDataException("Duplicate ids detected - " + duplicateIds);
         }
     }
 
@@ -149,11 +172,6 @@ public class EmployeeService {
         if (repository.existsByLogin(login)) {
             throw new BadInputException("Employee login not unique");
         }
-//        Double salary = validator.validateAndGetSalary(inputEmployee.getSalary(), "salary");
-//
-//        LocalDate startDate = validator.validateAndGetStartDate(inputEmployee.getStartDate(), "startDate");
-//
-//        Employee employee = new Employee(inputEmployee.getId(), inputEmployee.getLogin(), inputEmployee.getName(), salary, startDate);
         final Employee newEmployee = repository.save(inputEmployee);
 
         return newEmployee.getId();

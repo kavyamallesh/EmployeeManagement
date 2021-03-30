@@ -25,6 +25,10 @@ public class ExceptionHandlingController {
         if (localizedMessage.contains("java.time.format.DateTimeParseException")) {
             return ResponseEntity.badRequest().body("Invalid date");
         }
+
+        if(localizedMessage.contains("ConstraintViolationException") && localizedMessage.contains("EMPLOYEE(LOGIN)")){
+            return ResponseEntity.badRequest().body("Login id is not unique");
+        }
         return ResponseEntity.badRequest().body(e.getCause().getMessage());
     }
 
