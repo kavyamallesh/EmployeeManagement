@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class EmployeeValidator {
 
     public static final String CONTENT_TYPE_TEXT_CSV = "text/csv";
-    public static final DateTimeFormatter YYYY_MM_DD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final DateTimeFormatter validPattern = DateTimeFormatter.ofPattern("[yyyy-MM-dd][dd-MMM-yy]");
     public static final DateTimeFormatter DD_MMMM_YY = DateTimeFormatter.ofPattern("dd-MMM-yy");
     public static final List<String> FIELDS = Arrays.stream(Employee.class.getDeclaredFields()).map(Field::getName).collect(Collectors.toList());
 
@@ -65,13 +65,10 @@ public class EmployeeValidator {
     public LocalDate validateAndGetStartDate(String startDateString, String fieldName) throws InvalidFieldException {
         if (!isNull(startDateString, fieldName)) {
             try {
-                return LocalDate.parse(startDateString, YYYY_MM_DD);
+                return LocalDate.parse(startDateString, validPattern);
             } catch (DateTimeParseException e) {
-                try {
-                    return LocalDate.parse(startDateString, DD_MMMM_YY);
-                } catch (DateTimeParseException ex) {
-                    throw new InvalidFieldException("Invalid date format, startDate can only be in the format yyyy-MM-dd or dd-MMM-yy");
-                }
+                throw new InvalidFieldException("Invalid date format, startDate can only be in the format yyyy-MM-dd or dd-MMM-yy");
+
             }
         }
         return null;

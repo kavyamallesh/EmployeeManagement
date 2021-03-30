@@ -69,7 +69,7 @@ class EmployeeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Successful"));
 
-        assertThat(repository.findAll().size()).isEqualTo(totalEntities+2);
+        assertThat(repository.findAll().size()).isEqualTo(totalEntities + 2);
     }
 
     @Test
@@ -97,7 +97,7 @@ class EmployeeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Successfully created"));
 
-        assertThat(repository.findAll().size()).isEqualTo(totalEntities+1);
+        assertThat(repository.findAll().size()).isEqualTo(totalEntities + 1);
 
     }
 
@@ -105,8 +105,7 @@ class EmployeeControllerTest {
     void shouldUpdateEmployeeWhenCorrectInputIsGiven() throws Exception {
         String empId = "emp0001";
         String input = "{\n" +
-                "\"id\": \"emp0001\",\n" +
-                "\"name\": \"Harry Potter\",\n" +
+                "\"name\": \"Entwickeln Sie mit Vergnügen\",\n" +
                 "\"login\": \"hpotter2\",\n" +
                 "\"salary\": 80000, \n" +
                 "\"startDate\": \"2001-11-16\"\n" +
@@ -124,7 +123,9 @@ class EmployeeControllerTest {
         Optional<Employee> employeeUpdated = repository.findById(empId);
         assertTrue(employeeUpdated.isPresent());
         assertThat(employeeUpdated.get().getSalary()).isEqualTo(80000);
+        assertThat(employeeUpdated.get().getName()).isEqualTo("Entwickeln Sie mit Vergnügen");
     }
+
 
     @Test
     void shouldDeleteEmployeeWhenCorrectIdIsGiven() throws Exception {
